@@ -29,6 +29,15 @@ async function run() {
       const cases = await cursor.limit(3).toArray();
       res.send(cases);
     });
+
+    // cases all get api
+    app.get("/casesAll", async (req, res) => {
+      const query = {};
+
+      const cursor = casesCollection.find(query);
+      const cases = await cursor.toArray();
+      res.send(cases);
+    });
   } finally {
   }
 }

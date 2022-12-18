@@ -73,7 +73,7 @@ async function run() {
       res.send(result);
     });
 
-    // reviews get api
+    // reviews get with id api
     app.get("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
@@ -83,6 +83,17 @@ async function run() {
       const result = await cursor.toArray();
 
       res.send(result);
+    });
+
+    // reviews get with id api
+    app.get("/reviews", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = { email: req.query.email };
+      }
+      const cursor = reviewsCollection.find(query);
+      const reviews = await cursor.toArray();
+      res.send(reviews);
     });
   } finally {
   }

@@ -65,6 +65,13 @@ async function run() {
       const orders = await cursor.toArray();
       res.send(orders);
     });
+    // orders delete api
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // reviews post api
     app.post("/reviews", async (req, res) => {
@@ -82,6 +89,33 @@ async function run() {
       const cursor = reviewsCollection.find(query);
       const result = await cursor.toArray();
 
+      res.send(result);
+    });
+
+    app.get("/editReviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        _id: ObjectId(id),
+      };
+      const cursor = reviewsCollection.find(query);
+      const result = await cursor.toArray();
+
+      res.send(result);
+    });
+
+    app.patch("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const message = req.body.message;
+
+      const query = { _id: ObjectId(id) };
+
+      const updateDoc = {
+        $set: {
+          message: message,
+        },
+      };
+
+      const result = await reviewsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
 

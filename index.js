@@ -21,6 +21,7 @@ async function run() {
   try {
     const servicesCollection = client.db("lawyerFirm").collection("services");
     const ordersCollection = client.db("lawyerFirm").collection("orders");
+    const reviewsCollection = client.db("lawyerFirm").collection("reviews");
 
     // services get 3 api
     app.get("/servicesLimt3", async (req, res) => {
@@ -51,6 +52,24 @@ async function run() {
     app.post("/orders", async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order);
+      res.send(result);
+    });
+
+    //orders api
+    app.get("/orders", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = { email: req.query.email };
+      }
+      const cursor = ordersCollection.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders);
+    });
+
+    // reviews api created
+    app.post("/reviews", async (req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
       res.send(result);
     });
   } finally {

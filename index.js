@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.h6dt8.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -19,24 +19,39 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    const casesCollection = client.db("lawyerFirm").collection("cases");
+    const servicesCollection = client.db("lawyerFirm").collection("services");
+    const ordersCollection = client.db("lawyerFirm").collection("orders");
 
-    // cases get 3 api
-    app.get("/casesLimt3", async (req, res) => {
+    // services get 3 api
+    app.get("/servicesLimt3", async (req, res) => {
       const query = {};
 
-      const cursor = casesCollection.find(query);
-      const cases = await cursor.limit(3).toArray();
-      res.send(cases);
+      const cursor = servicesCollection.find(query);
+      const servicesLimit3 = await cursor.limit(3).toArray();
+      res.send(servicesLimit3);
     });
 
-    // cases all get api
-    app.get("/casesAll", async (req, res) => {
+    // services all get api
+    app.get("/servicesAll", async (req, res) => {
       const query = {};
 
-      const cursor = casesCollection.find(query);
-      const cases = await cursor.toArray();
-      res.send(cases);
+      const cursor = servicesCollection.find(query);
+      const services = await cursor.toArray();
+      res.send(services);
+    });
+
+    app.get("/servicesAll/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const service = await servicesCollection.findOne(query);
+      res.send(service);
+    });
+
+    // orders api
+    app.post("/orders", async (req, res) => {
+      const order = req.body;
+      const result = await ordersCollection.insertOne(order);
+      res.send(result);
     });
   } finally {
   }

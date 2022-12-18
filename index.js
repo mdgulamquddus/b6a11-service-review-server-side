@@ -102,7 +102,7 @@ async function run() {
 
       res.send(result);
     });
-
+    // reviews modified api
     app.patch("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const message = req.body.message;
@@ -128,6 +128,13 @@ async function run() {
       const cursor = reviewsCollection.find(query);
       const reviews = await cursor.toArray();
       res.send(reviews);
+    });
+    //reviews delete api
+    app.delete("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await reviewsCollection.deleteOne(query);
+      res.send(result);
     });
   } finally {
   }

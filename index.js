@@ -66,10 +66,22 @@ async function run() {
       res.send(orders);
     });
 
-    // reviews api created
+    // reviews post api
     app.post("/reviews", async (req, res) => {
       const review = req.body;
       const result = await reviewsCollection.insertOne(review);
+      res.send(result);
+    });
+
+    // reviews get api
+    app.get("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = {
+        id: id,
+      };
+      const cursor = reviewsCollection.find(query);
+      const result = await cursor.toArray();
+
       res.send(result);
     });
   } finally {

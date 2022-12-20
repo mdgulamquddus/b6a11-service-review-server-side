@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const app = express();
@@ -17,11 +18,36 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).send({ message: "Anauthorized Access" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      res.status(401).send({ message: "Anauthorized Access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
 async function run() {
   try {
     const servicesCollection = client.db("lawyerFirm").collection("services");
     const ordersCollection = client.db("lawyerFirm").collection("orders");
     const reviewsCollection = client.db("lawyerFirm").collection("reviews");
+
+    // jwt token
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ token });
+    });
 
     // services get 3 api
     app.get("/servicesLimt3", async (req, res) => {
@@ -86,7 +112,8 @@ async function run() {
       const query = {
         id: id,
       };
-      const cursor = reviewsCollection.find(query);
+      const sort = { timestamp: -1 };
+      const cursor = reviewsCollection.find(query).sort(sort);
       const result = await cursor.toArray();
 
       res.send(result);
@@ -119,8 +146,8 @@ async function run() {
       res.send(result);
     });
 
-    // reviews get with id api
-    app.get("/reviews", async (req, res) => {
+    // reviews get with emial api
+    app.get("/reviews", verifyJWT, async (req, res) => {
       let query = {};
       if (req.query.email) {
         query = { email: req.query.email };
